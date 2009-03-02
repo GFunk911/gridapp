@@ -3,6 +3,7 @@ module Hexagile
     def jquery_grid(name, opts={})
       @@grid_name = name.to_s
       grid_data = YAML::load_file("#{RAILS_ROOT}/config/jquery_grid/#{name}.yml")
+      grid_id = opts[:grid_id] || name
 
       before = grid_data[:before]
       params = grid_data[:params]
@@ -15,7 +16,7 @@ module Hexagile
           <script type="text/javascript">
             <%= before %>_n_
         		jQuery(document).ready(function(){ 
-        		  jQuery("#<%= name %>").jqGrid({        		    
+        		  jQuery("#<%= grid_id %>").jqGrid({        		    
         		  <% params.each do |key,value| %>
         		    <% if opts.keys.include?(key) %>
         		      _ss_<%= key %>: <%= opts[key].to_json %>,
@@ -46,8 +47,9 @@ module Hexagile
         gsub("<grid_name>", @@grid_name)
     end
     
-    def jquery_grid_table
-      "<table id=\"#{@@grid_name}\" class=\"scroll\"></table>"
+    def jquery_grid_table(grid_id=nil)
+      grid_id ||= @@grid_name
+      "<table id=\"#{grid_id}\" class=\"scroll jquery-grid\"></table>"
     end
     
     def jquery_grid_pager
