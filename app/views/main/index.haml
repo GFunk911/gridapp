@@ -1,0 +1,17 @@
+%table#addressTable
+  %tr
+    %th= "Move ID"
+    %th= "Orig Address"
+  - @moves.each do |m|
+    %tr
+      %td= m.move_id
+      %td.addressCell= m.orig_address
+%a#testlink{:href => "#"}= "fucking A nigga"
+- 10.times do
+  %br
+%div#map1.jmap
+= text_field :foo, :foo, :id => 'address'
+= submit_tag 'Submit', :id => 'address-submit-1'
+
+%script{:src => "/javascripts/jmap_start.js", :type => 'text/javascript'}
+
