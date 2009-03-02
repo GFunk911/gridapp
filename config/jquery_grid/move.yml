@@ -1,0 +1,38 @@
+--- 
+:before: var lastsel2;
+:params: 
+  :datatype: xml
+  :mtype: GET
+  :colNames: 
+  - Move
+  - Origin
+  - Destination
+  - Customer
+  :colModel: 
+  - :width: 50
+    :index: id
+    :name: id
+    :editable: false
+  - :width: 350
+    :index: orig
+    :name: orig
+    :editable: true  
+  - :width: 350
+    :index: dest
+    :name: dest
+    :editable: true  
+  - :width: 200
+    :index: customer
+    :name: customer
+    :editable: true
+  :pager: $('#<grid_name>_pager')
+  :function_onSelectRow: "(id)
+   	if(id && id!==lastsel2) {
+	  $('#<grid_name>').restoreRow(lastsel2);
+	  $('#<grid_name>').editRow(id,true);
+	  lastsel2=id;
+	}"
+  :sortname: orig
+  :sortorder: desc	
+  :rowNum: 30
+  :imgpath: /stylesheets/jqGrid-themes/basic/images
