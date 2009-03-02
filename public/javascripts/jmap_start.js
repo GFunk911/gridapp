@@ -23,15 +23,32 @@ function placeMarkerForAddress(address) {
     jQuery('#map1').jmap('SearchAddress', h, processResult);
 }
 
-function placeTableMarkers() {
-	jQuery('#addressTable td.addressCell').each(function(i,o) {
-		placeMarkerForAddress(jQuery(o).text())
+function placeTableMarkers(table_id,td_i) {
+	app = function(v) {
+		$("#msg_box").append(v + "<br/>")
+	} 
+	debug_str = function(o) {
+	    str = "ID: " + o.attr('id')
+		str += ", Class: " + o.attr('class')
+		str += ", Text: " + o.text()
+		str += ", HTML: " + o.html()
+		str += "<br/>"
+		return str	
+	}
+	app("Table HTML: " + $("#move").html())
+	$("#" + table_id + " td").each(function(i,o) {
+		if(i%4 == td_i) {
+	    	o = $(o)
+		    app(debug_str(o))
+		    placeMarkerForAddress(o.text())
+		}
 	})
 }
 
 jQuery(document).ready(function(){
     jQuery('#map1').jmap('init', {'mapType':'hybrid','mapCenter':[40.723056, -74.476250 ],'mapZoom':9});
-    placeTableMarkers()
+    //setTimeout("placeTableMarkers('pickups_grid',1)",2000);
+    //setTimeout("placeTableMarkers('deliveries_grid',2)",2000);
     jQuery('#address-submit-1').click(function(){
 	    placeMarkerForAddress(jQuery('#address').val())
         return false;   

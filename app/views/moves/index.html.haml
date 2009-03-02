@@ -1,0 +1,16 @@
+= move_list :list_name => 'Pickups', :grid_id => 'pickups_grid'
+
+= move_list :list_name => 'Deliveries', :grid_id => 'deliveries_grid'
+
+- 10.times do
+  %br
+%div#map-box
+  = "MAP BOX"
+  %br
+  %div#map1.jmap
+= element_draggable 'map-box'
+
+= javascript_include_tag "jmap_start"
+
+%div#msg_box
+

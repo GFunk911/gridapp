@@ -1,5 +1,40 @@
 .jmap {
-	height: 500px;
-	width: 68%;
+	height: 240px;
+	width: 100%;
 	margin:0 auto;
+}
+
+#pickups_move_list_box {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+}
+
+#deliveries_move_list_box {
+	position: absolute;
+	top: 140px;
+	left: 20px;
+}
+
+#map-box {
+	position: absolute;
+	top: 20px;
+	left: 1000px;
+	height: 240px;
+	width: 34%;
+	margin:0 auto;
+}
+
+#outer_div {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+}
+
+#deliveries_grid {
+	height: 50px;
+}
+
+.move-list-box {
+	height: 100px;
 }
