@@ -1,0 +1,23 @@
+jQuery(document).ready(function(){ 
+  jQuery(<%= "'##{@table_id}'" %>).jqGrid({
+    url:'/grid/grid_data?format=xml',
+    datatype: 'xml',
+    mtype: 'GET',
+    colNames: [<%= @columns.map { |x| "'#{x}'" }.join(",") %>],
+    colModel :[ 
+      <% @columns.each_with_index do |col,i| %>
+        <%= "{name:'#{col}', index:'#{col}', editable:true, width:250}" + ((i+1 == @columns.size) ? "" : ",") %>
+      <% end %> ],
+    pager: jQuery('#pager'),
+    rowNum:10,
+    rowList:[10,20,30],
+    sortname: 'id',
+    sortorder: "desc",
+    viewrecords: true,
+    imgpath: 'themes/basic/images',
+    caption: 'Test Grid',
+    cellEdit: true,
+    cellurl: '/grid/update?authenticity_token=<%=form_authenticity_token%>',
+    cellSubmit: 'remote'
+  }); 
+}); 
