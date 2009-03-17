@@ -1,11 +1,13 @@
-= move_list :list_name => 'Pickups', :grid_id => 'pickups_grid'
+= link_to_remote 'Add Page', {:url => {:controller => 'pages', :action => 'create', :name => 'foobar'}, :update => 'page-box'}
 
-= move_list :list_name => 'Deliveries', :grid_id => 'deliveries_grid'
+%div#move-lists
+  = move_list :list_name => 'Pickups', :grid_id => 'pickups_grid'
+  = move_list :list_name => 'Deliveries', :grid_id => 'deliveries_grid'
 
 - 10.times do
   %br
 %div#map-box
-  = "MAP BOX"
+  = "Dispatch Map"
   %br
   %div#map1.jmap
 = element_draggable 'map-box'
@@ -13,4 +15,3 @@
 = javascript_include_tag "jmap_start"
 
 %div#msg_box
-

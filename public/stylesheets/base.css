@@ -6,13 +6,13 @@
 
 #pickups_move_list_box {
 	position: absolute;
-	top: 20px;
+	top: 280px;
 	left: 20px;
 }
 
 #deliveries_move_list_box {
 	position: absolute;
-	top: 140px;
+	top: 400px;
 	left: 20px;
 }
 
@@ -37,4 +37,13 @@
 
 .move-list-box {
 	height: 100px;
+}
+
+#resize-box {
+	position: absolute;
+	top: 500px;
+	left: 20px;
+	height: 200px;
+	width: 200px;
+	background: silver;
 }

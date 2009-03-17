@@ -7,5 +7,9 @@
     = include_jquery_grid_javascript 
     = include_jquery_grid_css 
     = javascript_include_tag 'jquery.easydrag'
+    = javascript_include_tag 'ui.resizable'
+    = javascript_include_tag 'ui.tabs'
   %body
+    %div#page-box
+      = render :partial => 'pages/index'
     = yield :layout

@@ -1,10 +1,12 @@
-= jquery_grid :move, {:url => grid_data_moves_url, :grid_id => grid_id }
+= jquery_grid :move, {:url => grid_data_moves_url+"?move_type=#{list_name.to_s.downcase}", :grid_id => grid_id }
 %center
   %div{:id => move_list_box_id, :class => "move-list-box", :style => "background :black; color:white; width:975px;"}
     = list_name
     %a{:href => "#", :id => "#{list_name.to_s.downcase}_map_link", :onclick => "placeTableMarkers('#{grid_id}',#{grid_col_i(grid_id)})"}= "Add to Map"
     = jquery_grid_table(grid_id)
-    = jquery_grid_pager 
 
 - if true
   = element_draggable move_list_box_id
+  %script= "$('##{move_list_box_id}').resizable();"
+
+

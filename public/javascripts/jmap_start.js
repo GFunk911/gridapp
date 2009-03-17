@@ -25,7 +25,7 @@ function placeMarkerForAddress(address) {
 
 function placeTableMarkers(table_id,td_i) {
 	app = function(v) {
-		$("#msg_box").append(v + "<br/>")
+		//$("#msg_box").append(v + "<br/>")
 	} 
 	debug_str = function(o) {
 	    str = "ID: " + o.attr('id')
@@ -60,3 +60,44 @@ jQuery(document).ready(function(){
 	    alert("SUP")
     })	
 });
+
+jQuery(document).ready(function(){
+    $('#resize-box').resizable();
+    //$('#tab-container').tabs();
+    //alert($('#tab-container').text())
+});
+
+$(function () {
+    var tabContainers = $('div#tab-container > div');
+    
+    $('div#tab-container ul a').click(function () {
+        tabContainers.hide().filter(this.hash).show();
+        
+        $('div#tab-container ul a').removeClass('selected');
+        $(this).addClass('selected');
+        
+        return false;
+    }).filter(':first').click();
+});
+
+function addTabLink(div_id, link_text) {
+	$('div#tab-container ul').append("<li><a href='#" + div_id + "'>" + link_text + "</a></li>")
+}
+
+function addDiv(div_id,relative_url) {
+	//url = "http://localhost:3500/" + relative_url
+	//$.get(url,{},function(txt) {
+	//    $('div#tab-container').append("<div id='" + div_id + "'>" + txt + "</div>")	
+	//});
+	$('div#tab-container').append("<div id='" + div_id + "'>" + "stuff here" + "</div>")	
+}
+
+function addDivFull(div_id,link_text,relative_url) {
+	addTabLink(div_id,link_text)
+	addDiv(div_id,relative_url)
+}
+
+
+
+
+
