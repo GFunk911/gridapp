@@ -1,13 +1,16 @@
 jQuery(document).ready(function(){ 
-  jQuery(<%= "'##{@table_id}'" %>).jqGrid({
-    url:'/grid/grid_data?format=xml',
+  jQuery(<%= "'##{table_id}'" %>).jqGrid({
+    url:'/grid/grid_data?format=xml&table=<%=@table%>',
     datatype: 'xml',
     mtype: 'GET',
     colNames: [<%= @columns.map { |x| "'#{x}'" }.join(",") %>],
-    colModel :[ 
+    colModel: [ 
       <% @columns.each_with_index do |col,i| %>
-        <%= "{name:'#{col}', index:'#{col}', editable:true, width:250}" + ((i+1 == @columns.size) ? "" : ",") %>
+        <%= column_desc(col,@table,@columns.size == i+1) %>
       <% end %> ],
+	onSelectRow: function(id){
+      alert('onSelectRow');
+    },
     pager: jQuery('#pager'),
     rowNum:10,
     rowList:[10,20,30],
@@ -15,9 +18,16 @@ jQuery(document).ready(function(){
     sortorder: "desc",
     viewrecords: true,
     imgpath: '/themes/basic/images',
-    caption: 'Test Grid',
+    caption: '<%=table%>',
     cellEdit: true,
-    cellurl: '/grid/update?authenticity_token=<%=form_authenticity_token%>',
+    cellurl: '/grid/update?authenticity_token=<%=form_authenticity_token%>&table=<%=@table%>',
     cellSubmit: 'remote'
   }); 
 }); 
+
+jQuery(document).ready(function(){
+  jQuery(<%= "'##{table_id}_addrow'" %>).click(function() {
+    alert('clicked')
+    jQuery(<%= "'##{table_id}'" %>).editGridRow( "new",{url: '/grid/update?authenticity_token=<%=form_authenticity_token%>'} );	
+  })
+});
