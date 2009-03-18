@@ -1,2 +1,10 @@
 %script{:type => 'text/javascript', :src => "http://localhost:3000/grid/table_setup_js?format=js"}
+- form_for :column, Column.new, :url => {:controller => 'grid', :action => 'new_column'} do |f|
+  = "Add Column: " 
+  = f.text_field :column
+  = f.submit
+- form_for :column, Column.new, :url => {:controller => 'grid', :action => 'remove_column'} do |f|
+  = "Remove Column: " 
+  = f.select :column, CouchTable.new.keys.map { |x| [x,x] }
+  = f.submit
 %table#list

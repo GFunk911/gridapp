@@ -5,4 +5,4 @@
   - @rows.each do |row|
     %row{:id => row.id}
       - @columns.each do |col|
-        %cell= row.respond_to?(col) ? row.send(col) : ""
+        %cell= row[col]
