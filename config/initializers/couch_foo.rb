@@ -5,11 +5,25 @@
 require 'couchrest'
 class CouchRest::Document
   def method_missing(sym,*args,&b)
-    if include?(sym.to_s)
+    if self[sym]
       self[sym]
+    elsif virtual_column(sym)
+      virtual_column(sym).value_for(self)
+    elsif calc_column(sym)
+      calc_column(sym).value_for(self)
     else
-      super(sym,*args,&b)
+      self[sym]
     end
+  end
+  def virtual_column(col)
+    res = CouchTable.get(self[:table])
+    res = res.virtual_columns
+    res = res.find { |x| x.child_column == col.to_s }
+  end
+  def calc_column(col)
+    res = CouchTable.get(self[:table])
+    res = res.calc_columns
+    res = res.find { |x| x.child_column == col.to_s }
   end
   def id
     self["_id"]

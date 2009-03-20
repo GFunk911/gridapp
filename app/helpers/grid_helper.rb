@@ -3,7 +3,7 @@ module GridHelper
     comma = (last ? "" : ",")
     col_obj = Column.new(:table => table, :column => col)
     # "{name:'#{col}', index:'#{col}', editable:'true', width:'250'}"
-    h = {:name => col, :index => col, :editable => true, :width => 250}
+    h = {:name => col, :index => col, :editable => true, :width => 250, :sortable => true}
     if col_obj.dropdown?
       h[:edittype] = 'select'
       str = col_obj.possible_values.map { |x| "#{x}:#{x}" }.join(";")
@@ -42,7 +42,7 @@ class Column
     res
   end
   fattr(:map_row) do
-    CouchTable.new('columns').docs.find { |x| x['child_column'] == "#{table}:#{column}" }
+    CouchTable.new('columns').docs.find { |x| x['child_column'] == "#{table}:#{column}" and x['constraint_type'] == 'foreign_key' }
   end
   def dropdown?
     !!map_row

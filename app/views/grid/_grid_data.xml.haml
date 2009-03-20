@@ -5,4 +5,4 @@
   - @rows.each do |row|
     %row{:id => row.id}
       - @columns.each do |col|
-        %cell= row[col]
+        %cell= row.send(col)
