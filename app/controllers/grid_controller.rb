@@ -4,11 +4,11 @@ end
 
 class GridController < ApplicationController
   def index
-    @tables = ['columns','cities','people','junk']
+    @tables = CouchTable.tables.sort
   end
   def table_setup_js
     #@columns = Move.first.attributes.keys
-    @columns = CouchTable.new(params[:table]).keys
+    @columns = CouchTable.new(params[:table]).keys + ["link"]
     @table = params[:table]
     render :partial => 'table_setup_js', :locals => {:table_id => @table, :table => @table}
   end
@@ -17,7 +17,7 @@ class GridController < ApplicationController
     #@columns = Move.first.attributes.keys
     c = CouchTable.new(params[:table])
     @rows = c.docs
-    @columns = c.keys
+    @columns = c.keys + ['link']
     render :partial => 'grid_data'
   end
   def new_doc
@@ -48,12 +48,18 @@ class GridController < ApplicationController
     redirect_to :controller => 'grid', :action => 'index'
   end
   def remove_column
-    col = params[:column][:column]
+    col = params[:column]
     CouchTable.new(params[:table]).remove_column(col)
     redirect_to :controller => 'grid', :action => 'index'
   end
   def show
-    @table = CouchTable.new('people')
-    @row = @table.docs.first
+    @table = CouchTable.new(params[:table])
+    @row = @table.docs.find { |x| x.id == params[:id] }
   end
+  def new_table
+    table = params[:table][:column]
+    CouchTable.new(table).create!
+    redirect_to :controller => 'grid', :action => 'index'
+  end
+    
 end

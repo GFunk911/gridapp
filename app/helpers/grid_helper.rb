@@ -3,13 +3,26 @@ module GridHelper
     comma = (last ? "" : ",")
     col_obj = Column.new(:table => table, :column => col)
     # "{name:'#{col}', index:'#{col}', editable:'true', width:'250'}"
-    h = {:name => col, :index => col, :editable => true, :width => 250, :sortable => true}
+    h = {:name => col, :index => col, :editable => true, :width => 150, :sortable => true}
     if col_obj.dropdown?
       h[:edittype] = 'select'
       str = col_obj.possible_values.map { |x| "#{x}:#{x}" }.join(";")
       h[:editoptions] = {:value => str, :class => 'gridSelect'}.to_js_hash
     end
-    h.to_js_hash + comma
+    if col_obj.column == 'link'
+      #h[:formatter] = 'link'
+      h[:formatter] = 'myLink'
+    end
+    if col_obj.column == 'foo'
+    #  h[:formatter] = 'fooFormatter'
+    end
+  
+    h.to_js_hash.gsub(/'myLink'/,"myLink") + comma
+  end
+  def pretty_title(table,column)
+    str = column.gsub(/_/," ").camelize
+    delete_url = "/grid/remove_column?table=#{table}&column=#{column}"
+    str + "<a href=\"#{delete_url}\" class=title-link> (-)</a>"
   end
 end
 

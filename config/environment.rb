@@ -19,8 +19,8 @@ Rails::Initializer.run do |config|
   # config.gem "hpricot", :version => '0.6', :source => "http://code.whytheluckystiff.net"
   # config.gem "sqlite3-ruby", :lib => "sqlite3"
   # config.gem "aws-s3", :lib => "aws/s3"
-  config.gem :haml
-  config.gem :fattr
+  config.gem 'haml'
+  config.gem 'fattr'
   config.gem "rspec", :lib => false, :version => ">= 1.2.0" 
   config.gem "rspec-rails", :lib => false, :version => ">= 1.2.0" 
   

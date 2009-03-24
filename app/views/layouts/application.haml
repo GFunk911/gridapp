@@ -1,15 +1,9 @@
 %html
   %head
-    = javascript_include_tag 'gmaps'
     = javascript_include_tag :defaults
-    = javascript_include_tag 'jquery.jmap-r72'
     = stylesheet_link_tag 'base'
     = include_jquery_grid_javascript 
     = include_jquery_grid_css 
-    = javascript_include_tag 'jquery.easydrag'
-    = javascript_include_tag 'ui.resizable'
-    = javascript_include_tag 'ui.tabs'
+
   %body
-    %div#page-box
-      = render :partial => 'pages/index'
     = yield :layout
