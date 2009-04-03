@@ -2,7 +2,7 @@
 %span.table-actions
   %a{:href => "#", :id => "#{table}_add_column_link"}= " (Add Column)" 
   %a{:href => "#", :id => "#{table}_addrow"}= " (Add Row)"
-%script{:type => 'text/javascript', :src => "http://localhost:3000/grid/table_setup_js?format=js&table=#{table}"}
+%script{:type => 'text/javascript', :src => "/grid/table_setup_js?format=js&table=#{table}"}
 - form_for :column, Column.new, :url => {:controller => 'grid', :action => 'new_column', :table => table} do |f|
   %span{:id => "#{table}_add_column", :style => "display:none"}
     = f.text_field :column
