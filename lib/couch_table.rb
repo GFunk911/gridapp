@@ -5,10 +5,11 @@ class Object
 end
 
 class ColumnConstraint
-  attr_accessor :parent_table, :parent_column, :child_table, :child_column
+  attr_accessor :parent_table, :parent_column, :child_table, :child_column, :value
   def initialize(row)
     @parent_table, @parent_column = *row.parent_column.split(":")
     @child_table, @child_column = *row.child_column.split(":")
+    @value = row['value']
   end
   def self.all
     CouchTable.get('columns').docs.select { |x| x.constraint_type.camelize == to_s }.map { |x| new(x) }
@@ -20,6 +21,17 @@ class ForeignKey < ColumnConstraint
     value = row.send(child_column)
     CouchTable.get(parent_table).docs.find { |x| x.send(parent_column) == value }
   end
+  def rows_for(row)
+    value = row.send(parent_column)
+    CouchTable.get(child_table).docs.select { |x| x.send(child_column) == value }
+  end
+  def possible_values
+    res = CouchTable.new(parent_table).docs
+    res = res.select { |x| x.instance_eval(value) } if value
+    res = [""] + res.map { |x| x[parent_column.to_s] }
+    res = res.select { |x| x }
+    res.sort
+  end
 end
 
 class VirtualColumn < ColumnConstraint
@@ -27,6 +39,12 @@ class VirtualColumn < ColumnConstraint
     fk = row.fk_row(parent_table)
     parent = fk.row_for(row)
     parent ? parent.send(parent_column) : nil
+  end
+end
+
+class SortColumn < ColumnConstraint
+  def sorted_rows(rows)
+    rows.sort_by { |x| x.instance_eval(value) }
   end
 end
 
@@ -48,11 +66,18 @@ class CouchRest::Document
     a = ForeignKey.all
     a.find { |x| x.parent_table == other_table and x.child_table == table }
   end
+  def child_fk_row(other_table)
+    a = ForeignKey.all
+    a.find { |x| x.parent_table == table and x.child_table == other_table }
+  end
   def row_in_table(other_table)
     fk = fk_row(other_table)
     return fk.row_for(self)
-    value = send(fk.child_column)
-    CouchTable.get(fk.parent_table).docs.find { |x| x.send(fk.parent_column) == value }
+    #value = send(fk.child_column)
+    #CouchTable.get(fk.parent_table).docs.find { |x| x.send(fk.parent_column) == value }
+  end
+  def parent_rows_in_table(t)
+    child_fk_row(t).rows_for(self)
   end
 end
 
@@ -88,6 +113,9 @@ class CouchTable
     def tables
       all.map { |x| x.table }.uniq
     end
+    def couch_tables
+      tables.map { |x| new(x) }
+    end
   end
   attr_accessor :table
   def initialize(table)
@@ -97,15 +125,28 @@ class CouchTable
   def db
     klass.db
   end
-  fattr(:docs) do
+  fattr(:all_docs) do
     klass.get_documents("function(doc){if(doc['table']=='#{table}') emit(null,doc)}")
   end
+  fattr(:docs) do
+    col = sort_column
+    if col
+      col.sorted_rows(all_docs)
+    else
+      all_docs
+    end
+  end
+  
+  def sort_column
+    res = CouchTable.get('columns').all_docs.select { |x| x.constraint_type == 'sort_column' }.map { |x| SortColumn.new(x) }
+    res.find { |x| x.child_table == table }
+  end
   def virtual_columns
-    res = CouchTable.get('columns').docs.select { |x| x.constraint_type == 'virtual_column' }.map { |x| VirtualColumn.new(x) }
+    res = CouchTable.get('columns').all_docs.select { |x| x.constraint_type == 'virtual_column' }.map { |x| VirtualColumn.new(x) }
     res.select { |x| x.child_table == table }
   end
   def calc_columns
-    res = CouchTable.get('columns').docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
+    res = CouchTable.get('columns').all_docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
     res.select { |x| x.child_table == table }
   end
   def concrete_keys
@@ -133,5 +174,13 @@ class CouchTable
   end
   def create!
     db.save_doc(:table => table, :fake_column => "")
+  end
+  def to_csv
+    ks = concrete_keys.reject { |x| x.to_s == 'table' }
+    headers = ks.join(",")
+    rows = docs.map do |row|
+      ks.map { |k| row[k] }.join(",")
+    end
+    ([headers]+rows).join("\n")
   end
 end
