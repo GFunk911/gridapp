@@ -8,7 +8,7 @@ class GridController < ApplicationController
   end
   def table_setup_js
     #@columns = Move.first.attributes.keys
-    @columns = CouchTable.new(params[:table]).keys + ["link"]
+    @columns = CouchTable.get(params[:table]).keys + ["edit_link"]
     @columns = @columns.reject { |x| x.to_s == 'table' }
     @table = params[:table]
     render :partial => 'table_setup_js', :locals => {:table_id => @table, :table => @table}
@@ -16,22 +16,22 @@ class GridController < ApplicationController
   def grid_data
     #@rows = Move.all
     #@columns = Move.first.attributes.keys
-    c = CouchTable.new(params[:table])
+    c = CouchTable.get(params[:table])
     @rows = c.docs
-    @columns = c.keys + ['link']
+    @columns = c.keys + ['edit_link']
     @columns = @columns.reject { |x| x.to_s == 'table' }
     render :partial => 'grid_data'
   end
   def new_doc
     res = CouchRest::Document.new
-    res.database = CouchTable.new('abc').db
+    res.database = CouchTable.get('abc').db
     res
   end
   def update
     respond_to do |format|
       format.js do
         puts params.inspect
-        obj = (params[:id] and params[:id] != '_empty') ? CouchTable.new(params[:table]).docs.find { |x| x.id == params[:id] } : new_doc
+        obj = (params[:id] and params[:id] != '_empty') ? CouchTable.get(params[:table]).docs.find { |x| x.id == params[:id] } : new_doc
         params.delete(:id)
         params.delete(:authenticity_token)
         params.delete(:action)
@@ -46,21 +46,21 @@ class GridController < ApplicationController
   end
   def new_column
     col = params[:column][:column]
-    CouchTable.new(params[:table]).add_column(col)
+    CouchTable.get(params[:table]).add_column(col)
     redirect_to :controller => 'grid', :action => 'index'
   end
   def remove_column
     col = params[:column]
-    CouchTable.new(params[:table]).remove_column(col)
+    CouchTable.get(params[:table]).remove_column(col)
     redirect_to :controller => 'grid', :action => 'index'
   end
   def show
-    @table = CouchTable.new(params[:table])
+    @table = CouchTable.get(params[:table])
     @row = @table.docs.find { |x| x.id == params[:id] }
   end
   def new_table
     table = params[:table][:column]
-    CouchTable.new(table).create!
+    CouchTable.get(table).create!
     redirect_to :controller => 'grid', :action => 'index'
   end
 end

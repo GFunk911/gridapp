@@ -28,7 +28,7 @@ class CouchRest::Document
   def id
     self["_id"]
   end
-  def link
+  def edit_link
     "Edit:/grid/show/#{id}?table=#{table}"
   end
 end

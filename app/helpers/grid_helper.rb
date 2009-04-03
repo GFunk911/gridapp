@@ -9,7 +9,7 @@ module GridHelper
       str = col_obj.possible_values.map { |x| "#{x}:#{x}" }.join(";")
       h[:editoptions] = {:value => str, :class => 'gridSelect'}.to_js_hash
     end
-    if col_obj.column == 'link'
+    if col_obj.column == 'edit_link'
       #h[:formatter] = 'link'
       h[:formatter] = 'myLink'
     end
@@ -58,6 +58,6 @@ class Column
     !!map_row
   end
   def all_values
-    CouchTable.new(table).possible_values(column)
+    CouchTable.get(table).possible_values(column)
   end
 end
