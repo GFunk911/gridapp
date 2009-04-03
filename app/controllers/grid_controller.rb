@@ -9,6 +9,7 @@ class GridController < ApplicationController
   def table_setup_js
     #@columns = Move.first.attributes.keys
     @columns = CouchTable.new(params[:table]).keys + ["link"]
+    @columns = @columns.reject { |x| x.to_s == 'table' }
     @table = params[:table]
     render :partial => 'table_setup_js', :locals => {:table_id => @table, :table => @table}
   end
@@ -18,6 +19,7 @@ class GridController < ApplicationController
     c = CouchTable.new(params[:table])
     @rows = c.docs
     @columns = c.keys + ['link']
+    @columns = @columns.reject { |x| x.to_s == 'table' }
     render :partial => 'grid_data'
   end
   def new_doc
@@ -61,5 +63,4 @@ class GridController < ApplicationController
     CouchTable.new(table).create!
     redirect_to :controller => 'grid', :action => 'index'
   end
-    
 end
