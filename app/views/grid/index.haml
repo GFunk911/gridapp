@@ -1,9 +1,0 @@
-- form_for :table, Column.new, :url => {:controller => 'grid', :action => 'new_table'} do |f|
-  = "New Table: " 
-  = f.text_field :column
-  = f.submit
-%br
-= render :partial => 'table', :collection => @tables
-
-- 20.times do
-  %br
