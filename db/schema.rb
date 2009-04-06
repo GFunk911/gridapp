@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090302160503) do
+ActiveRecord::Schema.define(:version => 20090317213209) do
 
   create_table "moves", :force => true do |t|
     t.string   "orig"
@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(:version => 20090302160503) do
     t.string   "customer"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "amount"
   end
 
 end
