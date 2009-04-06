@@ -18,13 +18,19 @@ class CouchRest::Document
       self[sym]
     end
   end
+  def get_app
+    App.get(self[:app])
+  end
+  def get_table
+    app.get_table(:table => self[:table])
+  end
   def virtual_column(col)
-    res = CouchTable.get(self[:table])
+    res = get_table
     res = res.virtual_columns
     res = res.find { |x| x.child_column == col.to_s }
   end
   def calc_column(col)
-    res = CouchTable.get(self[:table])
+    res = get_table
     res = res.calc_columns
     res = res.find { |x| x.child_column == col.to_s }
   end

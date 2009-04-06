@@ -5,19 +5,17 @@ class Object
 end
 
 class ColumnConstraint
-  attr_accessor :parent_table, :parent_column, :child_table, :child_column, :value, :parent, :child
+  attr_accessor :parent_table, :parent_column, :child_table, :child_column, :value, :parent, :child, :app
   def initialize(row)
     @parent = row.parent_column
     @child = row.child_column
     @parent_table, @parent_column = *row.parent_column.split(":")
     @child_table, @child_column = *row.child_column.split(":")
     @value = row['value']
+    @app = row['app']
   end
-  def self.parent_all
-    CouchTable.get('columns').docs.map { |x| cls = eval(x.constraint_type.camelize); cls.new(x) }
-  end
-  def self.all
-    CouchTable.get('columns').docs.select { |x| x.constraint_type.camelize == to_s }.map { |x| new(x) }
+  def get_app
+    App.get(app)
   end
   def self.select_h(h)
     all.select_h(h)
@@ -30,14 +28,14 @@ end
 class ForeignKey < ColumnConstraint
   def row_for(row)
     value = row.send(child_column)
-    CouchTable.get(parent_table).docs.find { |x| x.send(parent_column) == value }
+    get_app.get_table(parent_table).docs.find { |x| x.send(parent_column) == value }
   end
   def rows_for(row)
     value = row.send(parent_column)
-    CouchTable.get(child_table).docs.select { |x| x.send(child_column) == value }
+    get_app.get_table(child_table).docs.select { |x| x.send(child_column) == value }
   end
   def possible_values
-    res = CouchTable.get(parent_table).docs
+    res = get_app.get_table(parent_table).docs
     res = res.select { |x| x.instance_eval(value) } if value
     res = [""] + res.map { |x| x[parent_column.to_s] }
     res = res.select { |x| x }
@@ -111,7 +109,7 @@ end
 
 class Array
   def method_missing(sym,*args,&b)
-    table = CouchTable.get(first.table)
+    table = first.get_table
     if table.keys.include?(sym.to_s)
       raise "no args #{args.insect}" unless args.size == 1
       select_h(sym => args.first)
@@ -124,11 +122,11 @@ end
 
 class CouchRest::Document
   def fk_row(other_table)
-    a = ForeignKey.all
+    a = get_app.constraints(ForeignKey)
     a.find { |x| x.parent_table == other_table.to_s and x.child_table == table }
   end
   def child_fk_row(other_table)
-    a = ForeignKey.all
+    a = get_app.constraints(ForeignKey)
     a.find { |x| x.parent_table == table and x.child_table == other_table.to_s }
   end
   def row_in_table(other_table)
@@ -166,11 +164,11 @@ class TableManager
   fattr(:tables) do
     Hash.new { |h,k| h[k] = new_table(k.to_s) }
   end
-  def new_table(table)
+  def new_table(app,table)
     if ['columns'].include?(table)
-      ConcreteCouchTable.new(table)
+      ConcreteCouchTable.new(app,table)
     else
-      CouchTable.table_class(table).new(table)
+      app.table_class(table).new(app,table)
     end
   end
   def get(t)
@@ -179,9 +177,16 @@ class TableManager
   end
 end
 
-module CouchTableClassMethods
-  def get(t)
-    table_manager.get(t)
+class App
+  attr_accessor :app
+  include FromHash
+  def self.get(a)
+    new(:app => a)
+  end
+  def get_table(t)
+    #table_manager.get(t)
+    t = t[:table] if t.is_a?(Hash)
+    TableManager.new.new_table(self,t)
   end
   fattr(:table_manager) { TableManager.new }
   fattr(:db) { CouchRest.database!("http://127.0.0.1:5984/testdb_test") }
@@ -202,7 +207,7 @@ module CouchTableClassMethods
     all.map { |x| x.table }.uniq
   end
   def virtual_tables
-    VirtualTable.all.map { |x| x.child_table }
+    constraints(VirtualTable).map { |x| x.child_table }
   end
   def tables
     concrete_tables + virtual_tables
@@ -214,6 +219,13 @@ module CouchTableClassMethods
     return VirtualCouchTable if virtual_tables.include?(table)
     ConcreteCouchTable
   end
+  def constraints(cls=nil)
+    if cls
+      get_table('columns').docs.select { |x| x.constraint_type.camelize == cls }.map { |x| cls.new(x) }
+    else
+      get_table('columns').docs.map { |x| cls = eval(x.constraint_type.camelize); cls.new(x) }
+    end
+  end
 end
 
 class CouchTable
@@ -221,13 +233,14 @@ class CouchTable
 end
 
 class ConcreteCouchTable < CouchTable
-  attr_accessor :table
-  def initialize(table)
+  attr_accessor :table, :app
+  def initialize(app,table)
+    @app = app
     @table = table
     raise "nil table" unless table.to_s != ''
   end
   def db
-    CouchTable.db
+    app.db
   end
   fattr(:all_docs) do
     klass.get_documents("function(doc){if(doc['table']=='#{table}') emit(null,doc)}")
@@ -244,15 +257,15 @@ class ConcreteCouchTable < CouchTable
     sorted_docs(all_docs)
   end
   def sort_column
-    res = CouchTable.get('columns').all_docs.select { |x| x.constraint_type == 'sort_column' }.map { |x| SortColumn.new(x) }
+    res = app.get_table('columns').all_docs.select { |x| x.constraint_type == 'sort_column' }.map { |x| SortColumn.new(x) }
     res.find { |x| x.child_table == table }
   end
   def virtual_columns
-    res = CouchTable.get('columns').all_docs.select { |x| x.constraint_type == 'virtual_column' }.map { |x| VirtualColumn.new(x) }
+    res = app.get_table('columns').all_docs.select { |x| x.constraint_type == 'virtual_column' }.map { |x| VirtualColumn.new(x) }
     res.select { |x| x.child_table == table }
   end
   def calc_columns
-    res = CouchTable.get('columns').all_docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
+    res = app.get_value('columns').all_docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
     res.select { |x| x.child_table == table }
   end
   def concrete_keys
@@ -300,7 +313,7 @@ class VirtualCouchTable < ConcreteCouchTable
     virtual_table_constraint.parent_table
   end
   def base_table
-    CouchTable.get(base_table_name)
+    app.get_table(base_table_name)
   end
   fattr(:all_docs) do
     base_table.all_docs
