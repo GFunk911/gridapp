@@ -19,7 +19,7 @@ class CouchRest::Document
     end
   end
   def get_app
-    App.get(self[:app])
+    App.get(:app => self['app'])
   end
   def get_table
     get_app.get_table(:table => self[:table])

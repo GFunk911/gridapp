@@ -175,7 +175,8 @@ class ConcreteCouchTable < CouchTable
     app.db
   end
   fattr(:all_docs) do
-    app.get_documents("function(doc){if(doc['table']=='#{table}') emit(null,doc)}")
+    #app.get_documents("function(doc){if(doc['table']=='#{table}') emit(null,doc)}")
+    app.all.select { |x| x.table == table }
   end
   def sorted_docs(rows)
     col = sort_column

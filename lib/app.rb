@@ -2,6 +2,8 @@ class App
   attr_accessor :app
   include FromHash
   def self.get(a)
+    a = a[:app] || a['app'] if a.is_a?(Hash)
+    raise "bad app param" unless a and a.strip != ''
     new(:app => a)
   end
   def get_table(t)
@@ -22,7 +24,7 @@ class App
     get_documents("function(doc){if(doc['_id']=='#{doc_id}') emit(null,doc)}").first
   end
   def all
-    get_documents("function(doc){ emit(null,doc)}")
+    get_documents("function(doc){if(doc['app']=='#{app}')emit(null,doc)}")
   end
   def concrete_tables
     all.map { |x| x.table }.uniq
