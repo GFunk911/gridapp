@@ -160,76 +160,8 @@ class DocumentList < BlankSlate
   end
 end
 
-class TableManager
-  fattr(:tables) do
-    Hash.new { |h,k| h[k] = new_table(k.to_s) }
-  end
-  def new_table(app,table)
-    if ['columns'].include?(table)
-      ConcreteCouchTable.new(app,table)
-    else
-      app.table_class(table).new(app,table)
-    end
-  end
-  def get(t)
-    tables[t]
-    #new_table(t.to_s)
-  end
-end
-
-class App
-  attr_accessor :app
-  include FromHash
-  def self.get(a)
-    new(:app => a)
-  end
-  def get_table(t)
-    #table_manager.get(t)
-    t = t[:table] if t.is_a?(Hash)
-    TableManager.new.new_table(self,t)
-  end
-  fattr(:table_manager) { TableManager.new }
-  fattr(:db) { CouchRest.database!("http://127.0.0.1:5984/testdb_test") }
-  def get_documents(view_func)
-    view_hash = {:map=>view_func}
-    view = db.temp_view(view_hash)
-    view['rows'].map do |x| 
-      CouchRest::Document.new(x['value']).tap { |x| x.database = db }
-    end
-  end
-  def find(doc_id)
-    get_documents("function(doc){if(doc['_id']=='#{doc_id}') emit(null,doc)}").first
-  end
-  def all
-    get_documents("function(doc){ emit(null,doc)}")
-  end
-  def concrete_tables
-    all.map { |x| x.table }.uniq
-  end
-  def virtual_tables
-    constraints(VirtualTable).map { |x| x.child_table }
-  end
-  def tables
-    concrete_tables + virtual_tables
-  end
-  def couch_tables
-    tables.map { |x| get(x) }
-  end
-  def table_class(table)
-    return VirtualCouchTable if virtual_tables.include?(table)
-    ConcreteCouchTable
-  end
-  def constraints(cls=nil)
-    if cls
-      get_table('columns').docs.select { |x| x.constraint_type.camelize == cls }.map { |x| cls.new(x) }
-    else
-      get_table('columns').docs.map { |x| cls = eval(x.constraint_type.camelize); cls.new(x) }
-    end
-  end
-end
-
 class CouchTable
-  extend CouchTableClassMethods
+  #extend CouchTableClassMethods
 end
 
 class ConcreteCouchTable < CouchTable
@@ -243,7 +175,7 @@ class ConcreteCouchTable < CouchTable
     app.db
   end
   fattr(:all_docs) do
-    klass.get_documents("function(doc){if(doc['table']=='#{table}') emit(null,doc)}")
+    app.get_documents("function(doc){if(doc['table']=='#{table}') emit(null,doc)}")
   end
   def sorted_docs(rows)
     col = sort_column
@@ -265,7 +197,7 @@ class ConcreteCouchTable < CouchTable
     res.select { |x| x.child_table == table }
   end
   def calc_columns
-    res = app.get_value('columns').all_docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
+    res = app.get_table('columns').all_docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
     res.select { |x| x.child_table == table }
   end
   def concrete_keys

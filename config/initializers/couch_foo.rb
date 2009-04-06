@@ -22,7 +22,7 @@ class CouchRest::Document
     App.get(self[:app])
   end
   def get_table
-    app.get_table(:table => self[:table])
+    get_app.get_table(:table => self[:table])
   end
   def virtual_column(col)
     res = get_table
