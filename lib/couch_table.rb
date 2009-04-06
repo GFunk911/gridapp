@@ -13,6 +13,9 @@ class ColumnConstraint
     @child_table, @child_column = *row.child_column.split(":")
     @value = row['value']
   end
+  def self.parent_all
+    CouchTable.get('columns').docs.map { |x| cls = eval(x.constraint_type.camelize); cls.new(x) }
+  end
   def self.all
     CouchTable.get('columns').docs.select { |x| x.constraint_type.camelize == to_s }.map { |x| new(x) }
   end
@@ -40,6 +43,9 @@ class ForeignKey < ColumnConstraint
     res = res.select { |x| x }
     res.sort
   end
+  def child_editable?
+    true
+  end
 end
 
 class VirtualColumn < ColumnConstraint
@@ -48,11 +54,17 @@ class VirtualColumn < ColumnConstraint
     parent = fk.row_for(row)
     parent ? parent.send(parent_column) : nil
   end
+  def child_editable?
+    false
+  end
 end
 
 class SortColumn < ColumnConstraint
   def sorted_rows(rows)
     rows.sort_by { |x| x.instance_eval(value) }
+  end
+  def child_editable?
+    true
   end
 end
 
@@ -66,6 +78,9 @@ class CalcColumn < ColumnConstraint
     row.instance_eval(code)
   #rescue => exp
   #  return nil
+  end
+  def child_editable?
+    false
   end
 end
 
