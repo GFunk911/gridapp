@@ -208,7 +208,7 @@ module CouchTableClassMethods
     concrete_tables + virtual_tables
   end
   def couch_tables
-    tables.map { |x| new(x) }
+    tables.map { |x| get(x) }
   end
   def table_class(table)
     return VirtualCouchTable if virtual_tables.include?(table)
