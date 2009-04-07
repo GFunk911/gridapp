@@ -1,0 +1,5 @@
+value,child_column,constraint_type,parent_column
+name + ' ' + name,people:double_name,calc_column,
+,people:city,foreign_key,cities:city
+,people:weather,virtual_column,cities:weather
+weather == 'Hot',people2:favorite_hot_city,foreign_key,cities:city
