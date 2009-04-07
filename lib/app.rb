@@ -42,11 +42,17 @@ class App
     return VirtualCouchTable if virtual_tables.include?(table)
     ConcreteCouchTable
   end
+  def constraint_row_class_name(row)
+    str = row['constraint_type']
+    raise "no constraint_type for row. #{row.inspect}" if str.blank?
+    str.camelize
+  end
   def constraints(cls=nil)
+    docs = get_table('columns').all_docs
     if cls
-      get_table('columns').docs.select { |x| x.constraint_type.camelize == cls.to_s }.map { |x| cls.new(x) }
+      docs.select { |x| constraint_row_class_name(x) == cls.to_s }.map { |x| cls.new(x) }
     else
-      get_table('columns').docs.map { |x| cls = eval(x.constraint_type.camelize); cls.new(x) }
+      docs.map { |x| eval(constraint_row_class_name(x)).new(x) }
     end
   end
 end

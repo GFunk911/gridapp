@@ -5,4 +5,7 @@ class GridParams
   def self.vars
     base_vars + ['app']
   end
+  def columns
+    super.reject { |x| ['table','app'].include?(x.to_s) }
+  end
 end

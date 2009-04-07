@@ -17,12 +17,6 @@ class ColumnConstraint
   def get_app
     App.get(app)
   end
-  def self.select_h(h)
-    all.select_h(h)
-  end
-  def self.find_h(h)
-    all.find_h(h)
-  end
 end
 
 class ForeignKey < ColumnConstraint
@@ -74,8 +68,9 @@ class CalcColumn < ColumnConstraint
   end
   def value_for(row)
     row.instance_eval(code)
-  #rescue => exp
-  #  return nil
+  rescue => exp
+    puts "error evaluating '#{code}'"
+    raise exp
   end
   def child_editable?
     false
@@ -109,6 +104,7 @@ end
 
 class Array
   def method_missing(sym,*args,&b)
+    return [] if empty?
     table = first.get_table
     if table.keys.include?(sym.to_s)
       raise "no args #{args.insect}" unless args.size == 1
@@ -190,15 +186,15 @@ class ConcreteCouchTable < CouchTable
     sorted_docs(all_docs)
   end
   def sort_column
-    res = app.get_table('columns').all_docs.select { |x| x.constraint_type == 'sort_column' }.map { |x| SortColumn.new(x) }
+    res = app.constraints(SortColumn)
     res.find { |x| x.child_table == table }
   end
   def virtual_columns
-    res = app.get_table('columns').all_docs.select { |x| x.constraint_type == 'virtual_column' }.map { |x| VirtualColumn.new(x) }
+    res = app.constraints(VirtualColumn)
     res.select { |x| x.child_table == table }
   end
   def calc_columns
-    res = app.get_table('columns').all_docs.select { |x| x.constraint_type == 'calc_column' }.map { |x| CalcColumn.new(x) }
+    res = app.constraints(CalcColumn)
     res.select { |x| x.child_table == table }
   end
   def concrete_keys
@@ -225,7 +221,7 @@ class ConcreteCouchTable < CouchTable
     docs.map { |x| x[col] }.uniq.select { |x| x }.sort
   end
   def create!
-    db.save_doc(:table => table, :fake_column => "")
+    db.save_doc(:table => table, :fake_column => "", :app => app.app)
   end
   def to_csv
     ks = concrete_keys.reject { |x| x.to_s == 'table' }
@@ -239,7 +235,7 @@ end
 
 class VirtualCouchTable < ConcreteCouchTable
   fattr(:virtual_table_constraint) do
-    VirtualTable.find_h(:child_table => table)
+    app.constraints(VirtualTable).find_h(:child_table => table)
   end
   fattr(:base_table_name) do
     raise "no virtual table constraint for #{table}" unless virtual_table_constraint

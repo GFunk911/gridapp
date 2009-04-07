@@ -1,2 +1,9 @@
+- form_for :table, @new_table, :url => {:controller => 'grid', :action => 'new_table'} do |f|
+  = "New Table: "
+  = f.text_field :table
+  = f.text_field :app
+  = f.submit
+%br
+
 - @app.tables.each do |t|
   = render_whole_grid t
