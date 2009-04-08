@@ -1,0 +1,4 @@
+constraint_type,parent_column,child_column,value
+foreign_key,games:home,bets:home,
+foreign_key,games:away,bets:away,
+calc_column,games:bets,games:bets,children(:bets).size

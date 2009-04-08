@@ -36,11 +36,11 @@ class Scraper
   end
   def result_rows_raw
     res = doc.search(xpath1)
-    res = res.map { |x| x.search(xpath2) }
+    res = res.map { |x| x.search(xpath2) } unless xpath2.blank?
     res
   end
   def result_rows
-    result_rows_raw.reject { |x| x.empty? }.map { |x| to_innerText(x) }
+    result_rows_raw.reject { |x| x.empty? }.map { |x| to_innerText(x) }.map { |x| x.is_a?(Array) ? x : [x] }
   end
   fattr(:row_hashes) do
     result_rows.map { |x| ScraperRowEval.new(:row_code => row_code, :row => x).row_hash.merge(:app => app) }
