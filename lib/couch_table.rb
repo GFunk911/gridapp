@@ -125,9 +125,9 @@ class CouchRest::Document
     a = get_app.constraints(ForeignKey)
     a.find { |x| x.parent_table == other_table.to_s and x.child_table == table }
   end
-  def child_fk_row(other_table)
+  def child_fk_rows(other_table)
     a = get_app.constraints(ForeignKey)
-    a.find { |x| x.parent_table == table and x.child_table == other_table.to_s }
+    a.select { |x| x.parent_table == table and x.child_table == other_table.to_s }
   end
   def row_in_table(other_table)
     fk = fk_row(other_table)
@@ -136,7 +136,9 @@ class CouchRest::Document
     #CouchTable.get(fk.parent_table).docs.find { |x| x.send(fk.parent_column) == value }
   end
   def parent_rows_in_table(t)
-    DocumentList.new(child_fk_row(t.to_s).rows_for(self))
+    child_row_list = child_fk_rows(t.to_s).map { |x| x.rows_for(self) }
+    res = child_row_list.flatten.group_by { |x| x.id }.values.select { |x| x.size == child_row_list.size }.map { |x| x.first }
+    DocumentList.new(res)
   end
   def parent(t)
     row_in_table(t)
