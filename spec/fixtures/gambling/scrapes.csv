@@ -1,0 +1,5 @@
+url,target_table,code
+http://www.cbssports.com/mlb/scoreboard/20090408,games,"doc.search('.SLTables1').map do |div|;
+  away,home = *div.search('//a').map { |x| x.innerText };
+  {:away => away, :home => home, :day => '4/8', :sport => 'MLB'};
+end.reject { |x| x[:away].blank? }"
