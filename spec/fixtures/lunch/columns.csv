@@ -1,0 +1,8 @@
+constraint_type,parent_column,child_column,value
+foreign_key,people:name,orders:person,
+foreign_key,restaurants:name,orders:restaurant,
+foreign_key,day:day,orders:day,
+foreign_key,people:name,payments:person
+calc_column,people:amount_ordered,people:amount_ordered,children(:orders).mysum(:amount)
+calc_column,people:amount_paid,people:amount_paid,children(:payments).mysum(:amount)
+calc_column,people:amount_owed,people:amount_owed,amount_ordered - amount_paid
