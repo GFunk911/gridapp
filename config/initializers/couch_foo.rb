@@ -6,7 +6,7 @@ require 'couchrest'
 class CouchRest::Document
   def method_missing(sym,*args,&b)
     if self[sym]
-      self[sym]
+      self[sym].is_a?(String) ? self[sym].gsub("\n","<br/>") : self[sym]
     elsif sym.to_s[-1..-1] == '='
       k = sym.to_s[0..-2]
       self[k] = args.first
