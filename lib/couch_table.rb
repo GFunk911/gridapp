@@ -5,7 +5,7 @@ class Object
 end
 
 class ColumnConstraint
-  attr_accessor :parent_table, :parent_column, :child_table, :child_column, :value, :parent, :child, :app
+  attr_accessor :parent_table, :parent_column, :child_table, :child_column, :value, :parent, :child, :app, :modifier
   def initialize(row)
     @parent = row.parent_column
     @child = row.child_column
@@ -13,6 +13,7 @@ class ColumnConstraint
     @child_table, @child_column = *row.child_column.split(":")
     @value = row['value']
     @app = row['app']
+    @modifier = row['modifier']
   end
   def get_app
     App.get(app)
@@ -37,6 +38,9 @@ class ForeignKey < ColumnConstraint
   end
   def child_editable?
     true
+  end
+  def for_possible_values?
+    modifier != 'no_edit'
   end
 end
 
