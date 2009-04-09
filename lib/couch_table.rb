@@ -109,6 +109,7 @@ end
 class Array
   def method_missing(sym,*args,&b)
     return [] if empty?
+    return super(sym,*args,&b) unless first.respond_to?(:get_table)
     table = first.get_table
     if table.keys.include?(sym.to_s)
       raise "no args #{args.insect}" unless args.size == 1
@@ -210,7 +211,9 @@ class ConcreteCouchTable < CouchTable
     virtual_columns.map { |x| x.child_column }.uniq
   end
   def keys
-    concrete_keys + virtual_keys + calc_columns.map { |x| x.child_column }.uniq
+    res = concrete_keys + virtual_keys + calc_columns.map { |x| x.child_column }.uniq 
+    res << 'scrapelink' if table == 'scrapes'
+    res
   end
   def remove_column(col)
     docs.each do |doc|

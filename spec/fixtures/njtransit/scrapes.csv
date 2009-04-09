@@ -1,0 +1,3 @@
+url,xpath1,xpath2,row_code,param_code
+/Users/mharris/Desktop/sf_servlet.srv2.html,form//table//option,,"{:station => row[0], :value => row[0].value, :table => 'stations'}",{}
+/Code/pegtest/spec/fixtures/test.html,div//a,,"{:abc => row[0], :xyz => param, :table => 'stuff', :app => 'njtransit'}","table('stations').docs[0..10].map { |x| x.station }"

@@ -40,4 +40,8 @@ class CouchRest::Document
   def edit_link
     "Edit:/grid/show/#{id}?table=#{table}"
   end
+  def scrapelink
+    "Run:/app/scrape?id=#{id}&amp;app=#{app}"
+    #{}"ab?/:=&cd"
+  end
 end

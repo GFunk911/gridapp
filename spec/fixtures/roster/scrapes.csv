@@ -1,2 +1,3 @@
 url,xpath1,xpath2,row_code,param_code
-http://www.cbssports.com/mlb/teams/roster/#{team},.SLTables1//td//a,,"{:player => row[0].gsub(/\(DL\)/,'').strip, :table => 'players', :team => params[:team]}",%w(NYM TEX STL TOR CLE HOU ARI OAK SEA).map { |x| {:team => x} }
+http://www.cbssports.com/mlb/teams/roster/#{param},.SLTables1//td//a,,"{:player => row[0], :table => 'players', :team => param}",%w(NYM TEX STL TOR CLE HOU ARI OAK SEA)
+http://en.wikipedia.org/wiki/NCAA_Men%27s_Division_I_Basketball_Championship,.wikitable//tr,//td,"{:team => row[0], :table => 'champs', :years => row[2]}",{}

@@ -122,5 +122,8 @@ describe 'Doc ALL' do
       col.possible_values.should == [''] + %w(Atlanta Dallas)
       col.dropdown?.should == true
     end
+    jit 'scrape test' do
+      run_scrapes('njtransit')
+    end
   end
 end

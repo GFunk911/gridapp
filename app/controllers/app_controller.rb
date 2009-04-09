@@ -16,9 +16,14 @@ class AppController < ApplicationController
   end
   def scrape
     app = App.get(params[:app])
-    row = app.get_table('scrapes').docs.first
-    s = Scraper.new(row)
-    s.create_rows!
+    scrapes = app.get_table('scrapes').docs.sort_by { |x| x['url'] }.reverse
+    docs = (params[:id] ? scrapes.select { |x| x.id == params[:id] } : scrapes)
+      
+    puts "doing #{docs.size} scrapes"
+    docs.each do |row|
+      s = Scraper.new(row)
+      s.create_rows!
+    end
     show_setup
     redirect_to :controller => 'app', :action => 'show', :app => params[:app]
   end
