@@ -47,6 +47,7 @@ Rails::Initializer.run do |config|
   config.after_initialize do
     Dir["#{RAILS_ROOT}/lib/*.rb"].each do |f|
       require f
+      require 'mharris_ext'
     end
   end
 end
