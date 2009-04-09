@@ -1,12 +1,17 @@
 require 'hpricot'
 require 'open-uri'
 require 'ostruct'
-
+def unescape(str)
+  h = { '&amp;' => '&', '&gt;' => '>', '&lt;' => '<',  '&quot;' => '"' }
+  res = str
+  h.each { |k,v| res = res.gsub(k,v) }
+  res
+end
 class ParamsInstance
   attr_accessor :param_code
   include FromHash
   def params
-    instance_eval(param_code)
+    instance_eval(unescape(param_code))
   end
   def table(t)
     App.get('njtransit').get_table(t)
@@ -29,6 +34,7 @@ class Scraper
   end
   def create_rows!
     instances.map { |x| x.create_rows! }.flatten
+    TableManager.instance!
   end
 end
 
@@ -120,7 +126,7 @@ class ScraperRowEval
     params
   end
   def row_hash
-    instance_eval(row_code).map_value { |x| ScraperInstance.to_innerText(x) }
+    instance_eval(unescape(row_code)).map_value { |x| ScraperInstance.to_innerText(x) }
   end
 end
 
